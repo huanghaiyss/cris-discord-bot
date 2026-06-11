@@ -1,30 +1,125 @@
-import platform, discord
+import asyncio
+import logging
+import platform
+
+import aiohttp
+import discord
 from discord import app_commands
 from discord.ext import commands
+
 from core.embeds import make_embed
+from core.interactions import interaction_context, safe_defer, safe_send
+
+log = logging.getLogger(__name__)
+
+
 class Utility(commands.Cog):
-    def __init__(self,bot): self.bot=bot
-    group=app_commands.Group(name='utility', description='Server utilities')
-    @group.command(name='ping')
-    async def ping(self,i): await i.response.send_message(embed=make_embed('Pong',f'{self.bot.latency*1000:.0f} ms','info'))
-    @group.command(name='userinfo')
-    async def userinfo(self,i,user:discord.Member|None=None): u=user or i.user; await i.response.send_message(embed=make_embed('User Info',f'{u.mention}\nID: `{u.id}`\nJoined: {getattr(u,"joined_at",None)}','info'))
-    @group.command(name='serverinfo')
-    async def serverinfo(self,i): g=i.guild; await i.response.send_message(embed=make_embed('Server Info',f'{g.name}\nMembers: {g.member_count}\nID: `{g.id}`','info'))
-    @group.command(name='avatar')
-    async def avatar(self,i,user:discord.User|None=None): u=user or i.user; e=make_embed('Avatar',u.mention,'info'); e.set_image(url=u.display_avatar.url); await i.response.send_message(embed=e)
-    @group.command(name='botinfo')
-    async def botinfo(self,i): await i.response.send_message(embed=make_embed('Bot Info',f'discord.py {discord.__version__}\nPython {platform.python_version()}\nGuilds: {len(self.bot.guilds)}','info'))
-    @group.command(name='channelinfo')
-    async def channelinfo(self,i,channel:discord.TextChannel|None=None): c=channel or i.channel; await i.response.send_message(embed=make_embed('Channel Info',f'{c.mention}\nID: `{c.id}`\nTopic: {getattr(c,"topic",None)}','info'))
-    @group.command(name='roleinfo')
-    async def roleinfo(self,i,role:discord.Role): await i.response.send_message(embed=make_embed('Role Info',f'{role.mention}\nID: `{role.id}`\nMembers: {len(role.members)}','info'))
-    @group.command(name='invite_info')
-    async def invite_info(self,i,invite:str):
-        try: inv=await self.bot.fetch_invite(invite); txt=f'Guild: {inv.guild}\nChannel: {inv.channel}\nUses: {inv.uses}'
-        except discord.HTTPException: txt='Invite not found or not accessible.'
-        await i.response.send_message(embed=make_embed('Invite Info',txt,'info'),ephemeral=True)
-    @group.command(name='poll')
-    async def poll(self,i,question:str,options:str):
-        opts=[o.strip() for o in options.split('|') if o.strip()][:10]; emojis=['1️⃣','2️⃣','3️⃣','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟']; e=make_embed('Poll',question+'\n\n'+'\n'.join(f'{emojis[n]} {o}' for n,o in enumerate(opts)),'info'); await i.response.send_message(embed=e); m=await i.original_response(); [await m.add_reaction(emojis[n]) for n in range(len(opts))]
-async def setup(bot): await bot.add_cog(Utility(bot))
+    def __init__(self, bot):
+        self.bot = bot
+
+    group = app_commands.Group(name="utility", description="Server utilities")
+
+    @group.command(name="ping")
+    async def ping(self, interaction: discord.Interaction):
+        await safe_send(interaction, embed=make_embed("Pong", f"{self.bot.latency * 1000:.0f} ms", "info"), ephemeral=False)
+
+    @group.command(name="userinfo")
+    async def userinfo(self, interaction: discord.Interaction, user: discord.Member | None = None):
+        target = user or interaction.user
+        await safe_send(
+            interaction,
+            embed=make_embed(
+                "User Info",
+                f'{target.mention}\nID: `{target.id}`\nJoined: {getattr(target, "joined_at", None)}',
+                "info",
+            ),
+            ephemeral=False,
+        )
+
+    @group.command(name="serverinfo")
+    async def serverinfo(self, interaction: discord.Interaction):
+        guild = interaction.guild
+        if guild is None:
+            await safe_send(interaction, embed=make_embed("Server Info", "This command only works in a server.", "error"), ephemeral=True)
+            return
+        await safe_send(
+            interaction,
+            embed=make_embed("Server Info", f"{guild.name}\nMembers: {guild.member_count}\nID: `{guild.id}`", "info"),
+            ephemeral=False,
+        )
+
+    @group.command(name="avatar")
+    async def avatar(self, interaction: discord.Interaction, user: discord.User | None = None):
+        target = user or interaction.user
+        embed = make_embed("Avatar", target.mention, "info")
+        embed.set_image(url=target.display_avatar.url)
+        await safe_send(interaction, embed=embed, ephemeral=False)
+
+    @group.command(name="botinfo")
+    async def botinfo(self, interaction: discord.Interaction):
+        await safe_send(
+            interaction,
+            embed=make_embed(
+                "Bot Info",
+                f"discord.py {discord.__version__}\nPython {platform.python_version()}\nGuilds: {len(self.bot.guilds)}",
+                "info",
+            ),
+            ephemeral=False,
+        )
+
+    @group.command(name="channelinfo")
+    async def channelinfo(self, interaction: discord.Interaction, channel: discord.TextChannel | None = None):
+        target = channel or interaction.channel
+        await safe_send(
+            interaction,
+            embed=make_embed(
+                "Channel Info",
+                f'{target.mention}\nID: `{target.id}`\nTopic: {getattr(target, "topic", None)}',
+                "info",
+            ),
+            ephemeral=False,
+        )
+
+    @group.command(name="roleinfo")
+    async def roleinfo(self, interaction: discord.Interaction, role: discord.Role):
+        await safe_send(
+            interaction,
+            embed=make_embed("Role Info", f"{role.mention}\nID: `{role.id}`\nMembers: {len(role.members)}", "info"),
+            ephemeral=False,
+        )
+
+    @group.command(name="invite_info")
+    async def invite_info(self, interaction: discord.Interaction, invite: str):
+        if not await safe_defer(interaction, ephemeral=True):
+            return
+        try:
+            inv = await self.bot.fetch_invite(invite)
+            text = f"Guild: {inv.guild}\nChannel: {inv.channel}\nUses: {inv.uses}"
+        except discord.HTTPException:
+            text = "Invite not found or not accessible."
+        await safe_send(interaction, embed=make_embed("Invite Info", text, "info"), ephemeral=True)
+
+    @group.command(name="poll")
+    async def poll(self, interaction: discord.Interaction, question: str, options: str):
+        opts = [o.strip() for o in options.split("|") if o.strip()][:10]
+        if len(opts) < 2:
+            await safe_send(interaction, embed=make_embed("Poll", "Provide at least two options separated by `|`.", "error"), ephemeral=True)
+            return
+        emojis = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣", "🔟"]
+        embed = make_embed(
+            "Poll",
+            question + "\n\n" + "\n".join(f"{emojis[n]} {option}" for n, option in enumerate(opts)),
+            "info",
+        )
+        if not await safe_defer(interaction, ephemeral=False):
+            return
+        try:
+            sent = await interaction.followup.send(embed=embed, wait=True)
+            for n in range(len(opts)):
+                await sent.add_reaction(emojis[n])
+        except (discord.NotFound, discord.HTTPException, aiohttp.ClientError, asyncio.TimeoutError) as exc:
+            log.warning("Failed to publish poll or add reactions: %s exc=%s", interaction_context(interaction), type(exc).__name__, exc_info=True)
+
+
+async def setup(bot):
+    await bot.add_cog(Utility(bot))

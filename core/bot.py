@@ -10,8 +10,9 @@ log=logging.getLogger(__name__)
 class EverythingBot(commands.Bot):
     def __init__(self, config:Config):
         intents=discord.Intents.all()
-        super().__init__(command_prefix=config.default_prefix, intents=intents)
-        self.config=config; self.db=Database(config.database_path); self.owner_ids_config=config.owner_ids or set()
+        configured_owner_ids = config.owner_ids or set()
+        super().__init__(command_prefix=config.default_prefix, intents=intents, owner_ids=configured_owner_ids or None)
+        self.config=config; self.db=Database(config.database_path); self.owner_ids_config=configured_owner_ids
     async def setup_hook(self):
         await self.db.open(); await self.db.apply_migrations(Path('migrations'))
         await self._load_cogs(); await self._register_views(); self.tree.on_error=handle_app_command_error
