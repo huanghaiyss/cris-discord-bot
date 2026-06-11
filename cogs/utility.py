@@ -21,10 +21,14 @@ class Utility(commands.Cog):
 
     @group.command(name="ping")
     async def ping(self, interaction: discord.Interaction):
+        if not await safe_defer(interaction, ephemeral=False):
+            return
         await safe_send(interaction, embed=make_embed("Pong", f"{self.bot.latency * 1000:.0f} ms", "info"), ephemeral=False)
 
     @group.command(name="userinfo")
     async def userinfo(self, interaction: discord.Interaction, user: discord.Member | None = None):
+        if not await safe_defer(interaction, ephemeral=False):
+            return
         target = user or interaction.user
         await safe_send(
             interaction,
@@ -38,6 +42,8 @@ class Utility(commands.Cog):
 
     @group.command(name="serverinfo")
     async def serverinfo(self, interaction: discord.Interaction):
+        if not await safe_defer(interaction, ephemeral=False):
+            return
         guild = interaction.guild
         if guild is None:
             await safe_send(interaction, embed=make_embed("Server Info", "This command only works in a server.", "error"), ephemeral=True)
@@ -50,6 +56,8 @@ class Utility(commands.Cog):
 
     @group.command(name="avatar")
     async def avatar(self, interaction: discord.Interaction, user: discord.User | None = None):
+        if not await safe_defer(interaction, ephemeral=False):
+            return
         target = user or interaction.user
         embed = make_embed("Avatar", target.mention, "info")
         embed.set_image(url=target.display_avatar.url)
@@ -57,6 +65,8 @@ class Utility(commands.Cog):
 
     @group.command(name="botinfo")
     async def botinfo(self, interaction: discord.Interaction):
+        if not await safe_defer(interaction, ephemeral=False):
+            return
         await safe_send(
             interaction,
             embed=make_embed(
@@ -69,6 +79,8 @@ class Utility(commands.Cog):
 
     @group.command(name="channelinfo")
     async def channelinfo(self, interaction: discord.Interaction, channel: discord.TextChannel | None = None):
+        if not await safe_defer(interaction, ephemeral=False):
+            return
         target = channel or interaction.channel
         await safe_send(
             interaction,
@@ -82,6 +94,8 @@ class Utility(commands.Cog):
 
     @group.command(name="roleinfo")
     async def roleinfo(self, interaction: discord.Interaction, role: discord.Role):
+        if not await safe_defer(interaction, ephemeral=False):
+            return
         await safe_send(
             interaction,
             embed=make_embed("Role Info", f"{role.mention}\nID: `{role.id}`\nMembers: {len(role.members)}", "info"),
@@ -118,7 +132,7 @@ class Utility(commands.Cog):
             for n in range(len(opts)):
                 await sent.add_reaction(emojis[n])
         except (discord.NotFound, discord.HTTPException, aiohttp.ClientError, asyncio.TimeoutError) as exc:
-            log.warning("Failed to publish poll or add reactions: %s exc=%s", interaction_context(interaction), type(exc).__name__, exc_info=True)
+            log.warning("POLL_SEND_FAILED %s exc=%s", interaction_context(interaction), type(exc).__name__)
 
 
 async def setup(bot):
