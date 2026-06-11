@@ -1,0 +1,15 @@
+# secrets
+.env
+*.env
+# python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.venv/
+# runtime
+data/*.db
+data/*.db-*
+logs/
+*.log

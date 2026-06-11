@@ -1,0 +1,18 @@
+[project]
+name = "discord-everything-bot"
+version = "0.1.0"
+description = "Massive modular Discord community bot using discord.py and SQLite"
+requires-python = ">=3.11"
+dependencies = [
+  "discord.py>=2.4,<3",
+  "python-dotenv>=1.0,<2",
+  "aiosqlite>=0.20,<1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8,<9", "pytest-asyncio>=0.23,<1"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+pythonpath = ["."]
