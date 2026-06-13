@@ -1,12 +1,12 @@
-Discord Everything Bot
+# Discord Everything Bot
 
-A modular Discord community bot built with Python and "discord.py".
+A modular Discord bot built with Python and `discord.py`.
 
-This project includes common server tools such as moderation, automod, tickets, economy, leveling, starboard, suggestions, role shop, and utility commands. It is designed to be easy to run, easy to extend, and organized around Discord slash commands and cogs.
+This bot includes common community-server features such as moderation, automod, tickets, economy, leveling, starboard, suggestions, role shop, utility commands, and simple fun commands. The project is organized with cogs so each feature can be maintained separately.
 
-Features
+## Features
 
-Administration
+### Administration
 
 - Sync slash commands
 - Load, reload, and unload cogs
@@ -15,31 +15,32 @@ Administration
 - View bot statistics
 - Shut down the bot safely
 
-Moderation
+### Moderation
 
 - Warn users
-- View and clear warnings
+- View warning history
+- Clear warnings
 - Timeout and remove timeout
 - Kick, ban, and unban users
 - View moderation cases
-- Per-server case numbers
-- Modlog support
+- Store per-server case numbers
+- Send moderation logs to a configured channel
 
-Automod
+### Automod
 
 - Enable or disable automod
-- Spam detection
-- Repeated message checks
-- Mention spam checks
-- Invite filtering
-- Link filtering
-- Violation logging
-- Optional panic mode flag
+- Detect spam
+- Detect repeated messages
+- Detect mention spam
+- Filter invite links
+- Filter normal links
+- Log automod violations
+- Configure panic mode
 
-Economy
+### Economy
 
-- Fake in-server coins
-- Balance checking
+- Server-only fake coins
+- Balance command
 - Daily rewards
 - Work command
 - Pay other users
@@ -49,50 +50,51 @@ Economy
 - Leaderboard
 - Admin give and take commands
 
-This economy system is only for Discord server fun. It does not use real money.
+The economy system is only for in-server fun. It does not use real money.
 
-Leveling
+### Leveling
 
 - XP from messages
-- Cooldowns to prevent spam farming
+- Cooldowns to reduce spam farming
 - Rank command
-- Leaderboard
-- Enable or disable leveling
-- Level-up channel
+- Level leaderboard
+- Level-up channel configuration
 - Role rewards
+- Enable or disable leveling per server
 
-Tickets
+### Tickets
 
 - Persistent ticket panel
 - Private ticket channels
-- Close button
+- Close ticket button
 - Add or remove users from tickets
-- Category configuration
-- Ticket log channel
-- Database records
+- Configure ticket category
+- Configure ticket log channel
+- Store ticket records in the database
 
-Starboard
+### Starboard
 
 - Track star reactions
 - Configurable star threshold
-- Duplicate prevention
-- Stored message mappings
+- Prevent duplicate starboard posts
+- Store starboard message mappings
 
-Suggestions
+### Suggestions
 
 - Submit suggestions
-- Vote buttons
+- Persistent vote buttons
 - One vote per user
-- Vote changes supported
+- Users can change their vote
 - Update suggestion status
 
-Role Shop
+### Role Shop
 
-- Admins can sell roles for server coins
-- Users can buy roles
-- Role hierarchy checks included
+- Sell roles for server coins
+- Buy roles with fake currency
+- Validate role hierarchy
+- Admin commands for adding and removing shop roles
 
-Utility and Fun
+### Utility and Fun
 
 - Ping
 - User info
@@ -111,188 +113,234 @@ Utility and Fun
 - Meme text
 - Random choice
 
-Requirements
+## Requirements
 
 - Python 3.11 or newer
 - A Discord bot application
-- "uv" or a standard Python virtual environment
+- `uv` or a standard Python virtual environment
 
 Main dependencies:
 
-- "discord.py"
-- "python-dotenv"
-- "aiosqlite"
-- "pytest"
-- "pytest-asyncio"
+- `discord.py`
+- `python-dotenv`
+- `aiosqlite`
+- `pytest`
+- `pytest-asyncio`
 
 Dependencies are listed in:
 
+```text
 requirements.txt
 pyproject.toml
+```
 
-Discord Developer Portal Setup
+## Discord Bot Setup
 
-1. Go to the Discord Developer Portal:
-   
-   https://discord.com/developers/applications
+Create a Discord application from the Discord Developer Portal:
 
-2. Create a new application.
+```text
+https://discord.com/developers/applications
+```
 
-3. Add a bot user to the application.
+Then:
 
-4. Reset or copy the bot token.
-
-5. Create a local ".env" file and put the token there.
-   
-   Do not commit the token. Do not paste it into public chats, issues, screenshots, logs, or README files.
-
-6. Enable the required privileged intents:
-   
+1. Create a new application.
+2. Add a bot user.
+3. Copy the bot token.
+4. Enable the required privileged intents:
    - Server Members Intent
    - Message Content Intent
-   
-   Message Content Intent is required for features like automod and leveling.
+5. Invite the bot to your server with:
+   - `bot`
+   - `applications.commands`
 
-7. Invite the bot to your server with:
-   
-   - "bot"
-   - "applications.commands"
-   
-   For testing on a private server, Administrator permission is the easiest option. For production, use only the permissions required by the features you enable.
+For a private test server, Administrator permission is the simplest option. For a production server, use only the permissions required by the features you plan to enable.
 
-Installation
+## Installation
 
 Clone the repository:
 
+```bash
 git clone https://github.com/YOUR_USERNAME/discord-everything-bot.git
 cd discord-everything-bot
+```
 
-Create a virtual environment with "uv":
+Create a virtual environment with `uv`:
 
+```bash
 uv venv --python python
 uv pip install -r requirements.txt
+```
 
 Or use the standard Python virtual environment workflow:
 
+```bash
 python -m venv .venv
+```
 
 Activate it on Linux/macOS:
 
+```bash
 source .venv/bin/activate
+```
 
 Activate it on Windows PowerShell:
 
+```powershell
 .venv\Scripts\Activate.ps1
+```
 
 Then install dependencies:
 
+```bash
 pip install -r requirements.txt
+```
 
-Environment Setup
+## Environment Variables
 
 Copy the example environment file:
 
+```bash
 cp .env.example .env
+```
 
-Edit ".env" and set your bot token:
+Edit `.env` and set your bot token:
 
+```env
 DISCORD_TOKEN=your_bot_token_here
+```
 
-Supported environment variables:
+Supported variables:
 
-DISCORD_TOKEN=
+| Variable | Required | Description |
+|---|---:|---|
+| `DISCORD_TOKEN` | Yes | Discord bot token |
+| `DATABASE_PATH` | No | SQLite database path. Defaults to `data/bot.db` |
+| `DEV_GUILD_ID` | No | Guild ID for faster slash command syncing during development |
+| `OWNER_IDS` | No | Comma-separated Discord user IDs for owner-only admin commands |
+| `DEFAULT_PREFIX` | No | Default text command prefix. Defaults to `!` |
+| `LOG_LEVEL` | No | Logging level. Defaults to `INFO` |
+
+Example:
+
+```env
+DISCORD_TOKEN=your_bot_token_here
 DATABASE_PATH=data/bot.db
 DEV_GUILD_ID=
 OWNER_IDS=
 DEFAULT_PREFIX=!
 LOG_LEVEL=INFO
+```
 
-Environment Variables
+## Running the Bot
 
-Variable| Required| Description
-"DISCORD_TOKEN"| Yes| Discord bot token
-"DATABASE_PATH"| No| SQLite database path. Defaults to "data/bot.db"
-"DEV_GUILD_ID"| No| Guild ID for faster slash command syncing during development
-"OWNER_IDS"| No| Comma-separated Discord user IDs for owner-only admin commands
-"DEFAULT_PREFIX"| No| Default text command prefix. Defaults to "!"
-"LOG_LEVEL"| No| Logging level. Defaults to "INFO"
+With `uv`:
 
-Running the Bot
-
-With "uv":
-
+```bash
 uv run python main.py
+```
 
 With an activated virtual environment:
 
+```bash
 python main.py
+```
 
-On first startup, the bot will:
+On startup, the bot will:
 
-1. Load environment variables from ".env"
+1. Load environment variables from `.env`
 2. Open the SQLite database
 3. Enable SQLite WAL mode and foreign keys
 4. Apply database migrations
-5. Load all cogs from the "cogs/" folder
-6. Register persistent ticket, suggestion, and role shop views
+5. Load all cogs from the `cogs/` directory
+6. Register persistent views for tickets, suggestions, and role shop
 7. Sync slash commands
 
-If "DEV_GUILD_ID" is set, slash commands sync faster for that server.
+If `DEV_GUILD_ID` is set, slash commands sync directly to that server and usually appear much faster.
 
-If "DEV_GUILD_ID" is not set, commands are synced globally. Global command updates can take longer to appear in Discord.
+If `DEV_GUILD_ID` is not set, commands are synced globally. Global command updates can take longer to appear in Discord.
 
-Testing
+## Testing
 
-Run a basic compile check:
+Run a compile check:
 
+```bash
 python -m compileall .
+```
 
-Run tests:
+Run the test suite:
 
+```bash
 python -m pytest
+```
 
-Or with "uv":
+Or with `uv`:
 
+```bash
 uv run python -m compileall .
 uv run python -m pytest
+```
 
-Database
+## Database
 
-The bot uses SQLite through "aiosqlite".
+The bot uses SQLite through `aiosqlite`.
 
-Database logic is handled in:
+Database setup is handled in:
 
+```text
 core/database.py
+```
 
 The initial migration is stored in:
 
+```text
 migrations/001_initial.sql
+```
 
-The database stores data for:
+The database stores:
 
-- Guild config
+- Guild configuration
 - Command logs
 - Moderation cases
 - Warnings
 - Automod settings
 - Economy balances
 - Inventory
-- Leveling
+- Leveling data
 - Level rewards
 - Tickets
-- Starboard
+- Starboard messages
 - Suggestions
-- Role shop
+- Role shop entries
 
 Runtime database files are ignored by git:
 
+```text
 data/*.db
 data/*.db-*
+```
 
-Command Overview
+## Project Structure
 
-Admin
+```text
+discord-everything-bot/
+├── cogs/
+├── core/
+├── data/
+├── migrations/
+├── tests/
+├── .env.example
+├── main.py
+├── pyproject.toml
+├── requirements.txt
+└── README.md
+```
 
+## Command Overview
+
+### Admin
+
+```text
 /admin sync
 /admin reload_cog
 /admin load_cog
@@ -301,9 +349,11 @@ Admin
 /admin set_prefix
 /admin stats
 /admin shutdown
+```
 
-Moderation
+### Moderation
 
+```text
 /mod warn
 /mod warnings
 /mod clear_warnings
@@ -315,9 +365,11 @@ Moderation
 /mod case
 /mod cases
 /mod set_modlog
+```
 
-Automod
+### Automod
 
+```text
 /automod status
 /automod enable
 /automod disable
@@ -329,9 +381,11 @@ Automod
 /automod toggle_link_filter
 /automod panic_enable
 /automod panic_disable
+```
 
-Economy
+### Economy
 
+```text
 /economy balance
 /economy daily
 /economy work
@@ -344,9 +398,11 @@ Economy
 /economy buy
 /economy give
 /economy take
+```
 
-Leveling
+### Leveling
 
+```text
 /level rank
 /level leaderboard
 /level set_channel
@@ -355,9 +411,11 @@ Leveling
 /level rewards
 /level disable
 /level enable
+```
 
-Utility
+### Utility
 
+```text
 /utility ping
 /utility userinfo
 /utility serverinfo
@@ -367,39 +425,49 @@ Utility
 /utility roleinfo
 /utility invite_info
 /utility poll
+```
 
-Tickets
+### Tickets
 
+```text
 /ticket panel
 /ticket close
 /ticket add_user
 /ticket remove_user
 /ticket config_category
 /ticket config_log_channel
+```
 
-Starboard
+### Starboard
 
+```text
 /starboard enable
 /starboard disable
 /starboard config
 /starboard ignore_channel
 /starboard unignore_channel
+```
 
-Suggestions
+### Suggestions
 
+```text
 /suggest submit
 /suggest channel
 /suggest status
+```
 
-Role Shop
+### Role Shop
 
+```text
 /roleshop list
 /roleshop buy
 /roleshop add
 /roleshop remove
+```
 
-Fun
+### Fun
 
+```text
 /fun coinflip
 /fun dice
 /fun eightball
@@ -407,59 +475,36 @@ Fun
 /fun trivia
 /fun meme_text
 /fun choose
+```
 
-Security Notes
+## Troubleshooting
 
-- Never commit ".env".
-- Never commit Discord bot tokens.
-- If a token is exposed, reset it immediately in the Discord Developer Portal.
-- Keep production tokens separate from testing tokens.
-- Use least-privilege permissions for production servers.
-- Keep the bot role below owner/admin roles that it should not manage.
-- Do not log secrets.
-- Do not upload local database files if they contain server data.
+### `Configuration error: DISCORD_TOKEN is missing`
 
-This bot does not include:
+Create `.env` from `.env.example` and set `DISCORD_TOKEN`.
 
-- Self-bot behavior
-- Token grabbing
-- Malware
-- Spyware
-- Phishing tools
-- Raid tools
-- Mass DM spam
-- Real-money gambling
-
-Moderation and admin commands use Discord permission checks and role hierarchy checks where needed.
-
-Troubleshooting
-
-"Configuration error: DISCORD_TOKEN is missing"
-
-Create ".env" from ".env.example" and set "DISCORD_TOKEN".
-
+```bash
 cp .env.example .env
+```
 
-Then edit ".env".
+### Slash commands do not appear
 
-Slash commands do not appear
+Set `DEV_GUILD_ID` in `.env` while developing. Guild command sync is usually much faster than global sync.
 
-For development, set "DEV_GUILD_ID" in ".env" so commands sync directly to your test server.
+Global slash commands can take longer to update.
 
-Global slash commands can take time to update.
-
-Permission errors
+### Permission errors
 
 Check:
 
-- The bot invite permissions
-- The bot role position
+- Bot invite permissions
+- Bot role position
 - Channel permissions
 - Server role hierarchy
 
 The bot role must be higher than the roles or members it needs to manage.
 
-Automod or leveling does not work
+### Automod or leveling does not work
 
 Check that Message Content Intent is enabled in the Discord Developer Portal.
 
@@ -469,7 +514,7 @@ Also make sure the bot can:
 - Send messages
 - Manage messages if automod actions require it
 
-Tickets fail to create
+### Tickets fail to create
 
 Check that the bot can:
 
@@ -478,34 +523,32 @@ Check that the bot can:
 - Create private channels
 - Manage permissions in that category
 
-Database errors
+### Database errors
 
-Make sure the bot can write to the "data/" folder.
+Make sure the bot can write to the `data/` directory.
 
-If you changed migrations manually during development, delete the local test database and restart the bot.
+If migrations changed during development, delete the local test database and restart the bot.
 
 Do not delete a production database unless you have a backup.
 
-Development Notes
+## Development
 
-The project is organized around cogs so features can be worked on separately.
+The project is split into cogs so each feature can be updated separately.
 
-Typical places to edit:
+Common folders:
 
+```text
 cogs/
 core/
 migrations/
 tests/
+```
 
-When adding a new feature:
+Before pushing changes:
 
-1. Add or update the cog.
-2. Add database changes if needed.
-3. Add or update tests.
-4. Run compile checks.
-5. Run the test suite.
-6. Test slash commands in a development server.
+```bash
+python -m compileall .
+python -m pytest
+```
 
-License
-
-Add your license here before publishing the repository.
+For development servers, set `DEV_GUILD_ID` so slash commands update quickly while testing.
